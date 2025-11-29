@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Automatyczny karmnik - główny skrypt dla Raspberry Pi
+Obsługuje komunikację Bluetooth i sterowanie servo
+"""
 
 import bluetooth
 import json
@@ -9,8 +13,9 @@ from gpiozero import Servo
 from gpiozero.pins.pigpio import PiGPIOFactory
 import schedule
 import logging
+import sys
 
-# Zapisywanie logow
+# Konfiguracja logowania
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -21,20 +26,22 @@ logging.basicConfig(
 )
 
 
-# Inicjalizacja serwo
 class AutoFeeder:
     def __init__(self, servo_pin=18):
+        """Inicjalizacja karmnika"""
         self.servo_pin = servo_pin
         self.servo = None
         self.schedules = []
         self.schedule_lock = threading.Lock()
         self.running = True
 
+        # Inicjalizacja servo
         self.init_servo()
 
         logging.info("Karmnik dziala")
 
     def init_servo(self):
+        """Inicjalizacja servo"""
         try:
             factory = PiGPIOFactory()
             self.servo = Servo(
@@ -44,31 +51,31 @@ class AutoFeeder:
                 max_pulse_width=2.5 / 1000
             )
             logging.info(f"Inicjalizacja serwo {self.servo_pin}")
-
-            self.servo.detach()
-            logging.info("Serwo odłączone po starcie")
         except Exception as e:
-            logging.error(f"Błąd inicjalizacji: {e}")
+            logging.error(f"Błąd inicjalizacji servo: {e}")
 
-
-# Proces karmienia
     def feed(self):
+        """Wykonaj karmienie - obrót servo"""
         if self.servo is None:
             logging.error("Servo nie jest zainicjalizowane")
             return False
 
         try:
-            logging.info("Rozpoczynanie karmienia...")
+            logging.info("Rozpoczynam karmienie...")
 
+            # Pozycja początkowa
             self.servo.min()
             time.sleep(0.5)
 
+            # Obrót do pozycji karmienia
             self.servo.max()
             time.sleep(1.0)
 
+            # Powrót do pozycji początkowej
             self.servo.min()
             time.sleep(0.5)
 
+            # Detach servo aby nie trzymało pozycji
             self.servo.detach()
 
             logging.info("Karmienie zakończone")
@@ -78,13 +85,14 @@ class AutoFeeder:
             logging.error(f"Błąd podczas karmienia: {e}")
             return False
 
-    # Aktualizacja harmonogramu karmienia
     def update_schedules(self, new_schedules):
+        """Aktualizuj harmonogram karmienia"""
         with self.schedule_lock:
+            # Wyczyść stary harmonogram
             schedule.clear()
             self.schedules = new_schedules
 
-            # Dodawanie nowych godzin
+            # Dodaj nowe zadania
             for time_str in self.schedules:
                 schedule.every().day.at(time_str).do(self.scheduled_feed)
                 logging.info(f"Dodano harmonogram: {time_str}")
@@ -92,11 +100,12 @@ class AutoFeeder:
             self.save_schedules()
 
     def scheduled_feed(self):
-        logging.info("Wykonywanie zaplanowanego karmienia")
+        """Zaplanowane karmienie"""
+        logging.info("Wykonuję zaplanowane karmienie")
         self.feed()
 
-# Zapisywanie harmonogramu do pliku
     def save_schedules(self):
+        """Zapisz harmonogram do pliku"""
         try:
             with open('schedules.json', 'w') as f:
                 json.dump({'schedules': self.schedules}, f)
@@ -104,8 +113,8 @@ class AutoFeeder:
         except Exception as e:
             logging.error(f"Błąd zapisu harmonogramu: {e}")
 
-# Wczytywanie harmonogramu
     def load_schedules(self):
+        """Wczytaj harmonogram z pliku"""
         try:
             with open('schedules.json', 'r') as f:
                 data = json.load(f)
@@ -117,37 +126,49 @@ class AutoFeeder:
             logging.error(f"Błąd wczytywania harmonogramu: {e}")
 
     def run_scheduler(self):
+        """Uruchom scheduler w osobnym wątku"""
         while self.running:
             schedule.run_pending()
             time.sleep(1)
 
     def cleanup(self):
+        """Cleanup przy zamykaniu"""
         self.running = False
         if self.servo:
             self.servo.close()
         logging.info("Cleanup zakończony")
 
 
-# Serwer bluetooth
 class BluetoothServer:
     def __init__(self, feeder):
+        """Inicjalizacja serwera Bluetooth"""
         self.feeder = feeder
         self.server_sock = None
         self.client_sock = None
         self.running = True
 
-        # SPP Bluetooth UUID
+        # UUID dla SPP (Serial Port Profile)
         self.uuid = "00001101-0000-1000-8000-00805F9B34FB"
 
-# Uruchomienie serwera bluetooth
     def start_server(self):
+        """Uruchom serwer Bluetooth"""
         try:
+            logging.info("Tworzenie socketu Bluetooth RFCOMM...")
             self.server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-            self.server_sock.bind(("", bluetooth.PORT_ANY))
+
+            # Ustawienie opcji socketu
+            self.server_sock.setsockopt(bluetooth.SOL_SOCKET, bluetooth.SO_REUSEADDR, 1)
+
+            logging.info("Bindowanie socketu...")
+            # Użyj portu 1 (zamiast PORT_ANY)
+            self.server_sock.bind(("", 1))
+
+            logging.info("Ustawianie nasłuchiwania...")
             self.server_sock.listen(1)
 
             port = self.server_sock.getsockname()[1]
 
+            logging.info("Reklamowanie usługi...")
             bluetooth.advertise_service(
                 self.server_sock,
                 "RaspberryPiFeeder",
@@ -156,34 +177,51 @@ class BluetoothServer:
                 profiles=[bluetooth.SERIAL_PORT_PROFILE]
             )
 
-            logging.info(f"Serwer Bluetooth nasłuchuje na porcie {port}")
-            logging.info("Czekanie na połączenie...")
+            logging.info(f"Serwer Bluetooth nasłuchuje na porcie RFCOMM {port}")
+            logging.info("Czekam na połączenie...")
 
             while self.running:
                 try:
-                    self.client_sock, client_info = self.server_sock.accept()
-                    logging.info(f"Połączono z {client_info}")
+                    self.server_sock.settimeout(1.0)  # Timeout aby móc sprawdzać self.running
+                    try:
+                        self.client_sock, client_info = self.server_sock.accept()
+                        logging.info(f"Połączono z {client_info}")
 
-                    self.send_message("CONNECTED")
-                    self.handle_client()
+                        self.send_message("CONNECTED")
+                        self.handle_client()
+                    except bluetooth.BluetoothError as e:
+                        if "timed out" not in str(e):
+                            raise
+                        continue
 
                 except bluetooth.BluetoothError as e:
                     if self.running:
                         logging.error(f"Błąd Bluetooth: {e}")
                 except Exception as e:
-                    logging.error(f"Błąd: {e}")
+                    if self.running:
+                        logging.error(f"Błąd: {e}")
                 finally:
                     if self.client_sock:
-                        self.client_sock.close()
+                        try:
+                            self.client_sock.close()
+                        except:
+                            pass
                         self.client_sock = None
+                        logging.info("Klient rozłączony")
 
+        except PermissionError as e:
+            logging.error(f"Brak uprawnień: {e}")
+            logging.error("Uruchom skrypt jako root: sudo python3 feeder_main.py")
+            sys.exit(1)
         except Exception as e:
             logging.error(f"Błąd uruchamiania serwera: {e}")
+            import traceback
+            logging.error(traceback.format_exc())
         finally:
             self.cleanup()
 
-# Połączenie z urządzeniem
     def handle_client(self):
+        """Obsługa połączonego klienta"""
         buffer = ""
 
         try:
@@ -194,6 +232,7 @@ class BluetoothServer:
 
                 buffer += data.decode('utf-8')
 
+                # Przetwarzaj kompletne linie
                 while '\n' in buffer:
                     line, buffer = buffer.split('\n', 1)
                     self.process_command(line.strip())
@@ -204,6 +243,7 @@ class BluetoothServer:
             logging.error(f"Błąd obsługi klienta: {e}")
 
     def process_command(self, command):
+        """Przetwórz komendę od klienta"""
         logging.info(f"Otrzymano komendę: {command}")
 
         try:
@@ -241,6 +281,7 @@ class BluetoothServer:
             self.send_message(f"ERROR:{str(e)}")
 
     def send_message(self, message):
+        """Wyślij wiadomość do klienta"""
         if self.client_sock:
             try:
                 self.client_sock.send((message + "\n").encode('utf-8'))
@@ -249,25 +290,37 @@ class BluetoothServer:
                 logging.error(f"Błąd wysyłania: {e}")
 
     def cleanup(self):
+        """Cleanup przy zamykaniu"""
         self.running = False
         if self.client_sock:
-            self.client_sock.close()
+            try:
+                self.client_sock.close()
+            except:
+                pass
         if self.server_sock:
-            self.server_sock.close()
+            try:
+                self.server_sock.close()
+            except:
+                pass
         logging.info("Serwer Bluetooth zamknięty")
 
 
 def main():
+    """Główna funkcja programu"""
     logging.info("Automatyczny Karmnik - Start")
 
+    # Inicjalizacja karmnika
     feeder = AutoFeeder(servo_pin=18)
 
+    # Wczytaj zapisany harmonogram
     feeder.load_schedules()
 
+    # Uruchom scheduler w osobnym wątku
     scheduler_thread = threading.Thread(target=feeder.run_scheduler, daemon=True)
     scheduler_thread.start()
     logging.info("Scheduler uruchomiony")
 
+    # Uruchom serwer Bluetooth
     bt_server = BluetoothServer(feeder)
 
     try:
