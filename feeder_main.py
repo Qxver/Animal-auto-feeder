@@ -44,6 +44,9 @@ class AutoFeeder:
                 max_pulse_width=2.5 / 1000
             )
             logging.info(f"Inicjalizacja serwo {self.servo_pin}")
+
+            self.servo.detach()
+            logging.info("Serwo odłączone po starcie")
         except Exception as e:
             logging.error(f"Błąd inicjalizacji: {e}")
 
