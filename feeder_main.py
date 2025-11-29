@@ -5,6 +5,7 @@ Obsługuje komunikację Bluetooth i sterowanie servo
 """
 
 import bluetooth
+import socket
 import json
 import threading
 import time
@@ -157,11 +158,11 @@ class BluetoothServer:
             self.server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
 
             # Ustawienie opcji socketu
-            self.server_sock.setsockopt(bluetooth.SOL_SOCKET, bluetooth.SO_REUSEADDR, 1)
+            self.server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
             logging.info("Bindowanie socketu...")
-            # Użyj portu 1 (zamiast PORT_ANY)
-            self.server_sock.bind(("", 1))
+            # Użyj PORT_ANY aby system przydzielił wolny port
+            self.server_sock.bind(("", bluetooth.PORT_ANY))
 
             logging.info("Ustawianie nasłuchiwania...")
             self.server_sock.listen(1)
