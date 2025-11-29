@@ -65,8 +65,18 @@ public class BluetoothManager {
                 Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
                 if (pairedDevices != null) {
                     devices.addAll(pairedDevices);
+                    Log.d(TAG, "Znaleziono " + devices.size() + " sparowanych urządzeń");
+                    for (BluetoothDevice device : devices) {
+                        Log.d(TAG, "Urządzenie: " + device.getName() + " [" + device.getAddress() + "]");
+                    }
+                } else {
+                    Log.w(TAG, "getBondedDevices() zwróciło null");
                 }
+            } else {
+                Log.e(TAG, "Brak uprawnienia BLUETOOTH_CONNECT");
             }
+        } else {
+            Log.e(TAG, "BluetoothAdapter jest null");
         }
         return devices;
     }
@@ -74,12 +84,6 @@ public class BluetoothManager {
     public void connect(BluetoothDevice device) {
         new Thread(() -> {
             try {
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    notifyError("Brak uprawnień Bluetooth");
-                    return;
-                }
-
                 bluetoothSocket = device.createRfcommSocketToServiceRecord(MY_UUID);
                 bluetoothAdapter.cancelDiscovery();
                 bluetoothSocket.connect();
@@ -91,6 +95,10 @@ public class BluetoothManager {
                 startListening();
                 notifyConnected();
 
+            } catch (SecurityException e) {
+                Log.e(TAG, "Security exception - missing permissions", e);
+                notifyError("Brak uprawnień Bluetooth. Włącz w ustawieniach aplikacji.");
+                disconnect();
             } catch (IOException e) {
                 Log.e(TAG, "Connection failed", e);
                 notifyError("Nie udało się połączyć: " + e.getMessage());

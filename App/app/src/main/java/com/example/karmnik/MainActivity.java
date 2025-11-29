@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
@@ -46,6 +47,9 @@ public class MainActivity extends AppCompatActivity implements ScheduleAdapter.S
 
         // Initialize database
         db = AppDatabase.getDatabase(this);
+
+        // Check Bluetooth permissions FIRST
+        checkBluetoothPermissions();
 
         // Initialize Bluetooth
         bluetoothManager = new BluetoothManager(this);
@@ -89,9 +93,25 @@ public class MainActivity extends AppCompatActivity implements ScheduleAdapter.S
         // Initialize FAB
         addScheduleFab = findViewById(R.id.addScheduleFab);
         addScheduleFab.setOnClickListener(v -> showAddTimeDialog());
+    }
 
-        // Check Bluetooth permissions
-        checkBluetoothPermissions();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            if (allGranted) {
+                Toast.makeText(this, "Uprawnienia Bluetooth nadane", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Niektóre uprawnienia zostały odrzucone. Bluetooth może nie działać.", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
@@ -194,8 +214,25 @@ public class MainActivity extends AppCompatActivity implements ScheduleAdapter.S
         }
 
         List<BluetoothDevice> devices = bluetoothManager.getPairedDevices();
+
+        // Debug - pokaż liczbę urządzeń
+        Log.d("MainActivity", "Liczba sparowanych urządzeń: " + devices.size());
+
         if (devices.isEmpty()) {
-            Toast.makeText(this, "Brak sparowanych urządzeń", Toast.LENGTH_SHORT).show();
+            // Pokaż dialog z opcją manualnego wprowadzenia adresu MAC
+            new AlertDialog.Builder(this)
+                    .setTitle("Brak sparowanych urządzeń")
+                    .setMessage("Najpierw sparuj urządzenie w:\nUstawienia → Bluetooth → FeederPi\n\nLub wprowadź adres MAC ręcznie")
+                    .setPositiveButton("Otwórz ustawienia", (dialog, which) -> {
+                        Intent intentOpenBluetoothSettings = new Intent();
+                        intentOpenBluetoothSettings.setAction(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
+                        startActivity(intentOpenBluetoothSettings);
+                    })
+                    .setNeutralButton("Wprowadź MAC", (dialog, which) -> {
+                        showManualMacDialog();
+                    })
+                    .setNegativeButton("Anuluj", null)
+                    .show();
             return;
         }
 
@@ -218,6 +255,54 @@ public class MainActivity extends AppCompatActivity implements ScheduleAdapter.S
                 })
                 .setNegativeButton("Anuluj", null)
                 .show();
+    }
+
+    private void showManualMacDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Wprowadź adres MAC");
+
+        EditText input = new EditText(this);
+        input.setHint("B8:27:EB:67:07:B9");
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+        layout.addView(input);
+
+        builder.setView(layout);
+        builder.setPositiveButton("Połącz", (dialog, which) -> {
+            String macAddress = input.getText().toString().trim().toUpperCase();
+            if (macAddress.matches("([0-9A-F]{2}:){5}[0-9A-F]{2}")) {
+                connectToMacAddress(macAddress);
+            } else {
+                Toast.makeText(this, "Nieprawidłowy format adresu MAC", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Anuluj", null);
+        builder.show();
+    }
+
+    private void connectToMacAddress(String macAddress) {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null) {
+            Toast.makeText(this, "Bluetooth niedostępny", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            BluetoothDevice device = adapter.getRemoteDevice(macAddress);
+            Toast.makeText(this, "Łączenie z " + macAddress + "...", Toast.LENGTH_SHORT).show();
+            bluetoothManager.connect(device);
+        } catch (IllegalArgumentException e) {
+            Toast.makeText(this, "Nieprawidłowy adres MAC", Toast.LENGTH_SHORT).show();
+        } catch (SecurityException e) {
+            Toast.makeText(this, "Brak uprawnień Bluetooth - włącz w ustawieniach aplikacji", Toast.LENGTH_LONG).show();
+            // Otwórz ustawienia aplikacji
+            Intent intent = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            intent.setData(android.net.Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        }
     }
 
     private void syncScheduleToDevice() {
@@ -249,7 +334,7 @@ public class MainActivity extends AppCompatActivity implements ScheduleAdapter.S
 
         EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
-        input.setHint("HH:mm");
+        input.setHint("HH:mm (np. 12:50)");
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
