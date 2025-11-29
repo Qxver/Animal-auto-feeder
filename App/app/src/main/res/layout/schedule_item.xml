@@ -18,13 +18,13 @@
         android:id="@+id/editButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Edit"
+        android:text="EDYTUJ"
         android:layout_marginEnd="8dp" />
 
     <Button
         android:id="@+id/deleteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Delete" />
+        android:text="USUŃ" />
 
 </LinearLayout>
