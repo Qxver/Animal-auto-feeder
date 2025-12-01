@@ -145,4 +145,4 @@ echo "Sprawdź Bluetooth:"
 echo "  bluetoothctl show"
 echo ""
 echo "Uruchom ponownie Raspberry Pi, aby zastosować wszystkie zmiany:"
-echo "  sudo reboot"
+echo "  sudo reboot"rm
