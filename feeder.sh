@@ -24,7 +24,7 @@ show_help() {
 }
 
 test_feed() {
-    echo "🍖 Test karmienia..."
+    echo "Test karmienia..."
     cd "$FEEDER_DIR"
     python3 << 'EOF'
 from feeder_simple import SimpleFeeder
@@ -34,15 +34,15 @@ success = feeder.feed()
 sys.exit(0 if success else 1)
 EOF
     if [ $? -eq 0 ]; then
-        echo "✓ Test zakończony pomyślnie"
+        echo "Test zakończony pomyślnie"
     else
-        echo "✗ Test nie powiódł się"
+        echo "Test nie powiódł się"
     fi
 }
 
 show_schedule() {
     if [ ! -f "$CONFIG_FILE" ]; then
-        echo "✗ Brak pliku konfiguracji"
+        echo "Brak pliku konfiguracji"
         return
     fi
 
@@ -63,7 +63,7 @@ EOF
 
 add_schedule() {
     if [ -z "$1" ]; then
-        echo "✗ Podaj godzinę w formacie HH:MM"
+        echo "Podaj godzinę w formacie HH:MM"
         echo "Przykład: ./feeder.sh add 14:30"
         return
     fi
@@ -72,7 +72,7 @@ add_schedule() {
 
     # Walidacja formatu
     if ! [[ "$TIME" =~ ^([01][0-9]|2[0-3]):[0-5][0-9]$ ]]; then
-        echo "✗ Nieprawidłowy format. Użyj HH:MM (np. 14:30)"
+        echo "Nieprawidłowy format. Użyj HH:MM (np. 14:30)"
         return
     fi
 
@@ -82,20 +82,20 @@ with open('$CONFIG_FILE', 'r') as f:
     config = json.load(f)
 
 if '$TIME' in config['schedules']:
-    print("⚠ Godzina $TIME już istnieje w harmonogramie")
+    print("Godzina $TIME już istnieje w harmonogramie")
 else:
     config['schedules'].append('$TIME')
     config['schedules'].sort()
     with open('$CONFIG_FILE', 'w') as f:
         json.dump(config, f, indent=2)
-    print("✓ Dodano godzinę $TIME")
-    print("⚠ Pamiętaj zrestartować karmnik: sudo systemctl restart feeder")
+    print("Dodano godzinę $TIME")
+    print("Pamiętaj zrestartować karmnik: sudo systemctl restart feeder")
 EOF
 }
 
 remove_schedule() {
     if [ -z "$1" ]; then
-        echo "✗ Podaj godzinę do usunięcia"
+        echo "Podaj godzinę do usunięcia"
         echo "Przykład: ./feeder.sh remove 14:30"
         return
     fi
@@ -111,10 +111,10 @@ if '$TIME' in config['schedules']:
     config['schedules'].remove('$TIME')
     with open('$CONFIG_FILE', 'w') as f:
         json.dump(config, f, indent=2)
-    print("✓ Usunięto godzinę $TIME")
-    print("⚠ Pamiętaj zrestartować karmnik: sudo systemctl restart feeder")
+    print("Usunięto godzinę $TIME")
+    print("Pamiętaj zrestartować karmnik: sudo systemctl restart feeder")
 else:
-    print("✗ Godzina $TIME nie istnieje w harmonogramie")
+    print("Godzina $TIME nie istnieje w harmonogramie")
 EOF
 }
 
@@ -151,7 +151,7 @@ case "$1" in
     edit)
         nano "$CONFIG_FILE"
         echo ""
-        echo "⚠ Zrestartuj karmnik aby zastosować zmiany:"
+        echo "Zrestartuj karmnik aby zastosować zmiany:"
         echo "  sudo systemctl restart feeder.service"
         ;;
     add)
@@ -164,9 +164,9 @@ case "$1" in
         show_help
         ;;
     *)
-        echo "✗ Nieznana komenda: $1"
+        echo "Nieznana komenda: $1"
         echo ""
         show_help
         exit 1
         ;;
-esac
+esa

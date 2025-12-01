@@ -56,9 +56,9 @@ class SimpleFeeder:
                 min_pulse_width=0.5 / 1000,
                 max_pulse_width=2.5 / 1000
             )
-            logging.info(f"✓ Servo zainicjalizowane na GPIO {self.servo_pin}")
+            logging.info(f"Servo zainicjalizowane na GPIO {self.servo_pin}")
         except Exception as e:
-            logging.error(f"✗ Błąd inicjalizacji servo: {e}")
+            logging.error(f"Błąd inicjalizacji servo: {e}")
             sys.exit(1)
 
     def feed(self):
@@ -85,11 +85,11 @@ class SimpleFeeder:
             # Detach servo
             self.servo.detach()
 
-            logging.info("✓ Karmienie zakończone")
+            logging.info("Karmienie zakończone")
             return True
 
         except Exception as e:
-            logging.error(f"✗ Błąd podczas karmienia: {e}")
+            logging.error(f"Błąd podczas karmienia: {e}")
             return False
 
     def load_config(self):
@@ -98,12 +98,12 @@ class SimpleFeeder:
             with open(self.config_file, 'r') as f:
                 config = json.load(f)
                 self.schedules = config.get('schedules', [])
-            logging.info(f"✓ Konfiguracja wczytana: {len(self.schedules)} harmonogramów")
+            logging.info(f"Konfiguracja wczytana: {len(self.schedules)} harmonogramów")
         except FileNotFoundError:
             logging.info("⚠ Brak pliku konfiguracji, tworzę domyślny...")
             self.create_default_config()
         except Exception as e:
-            logging.error(f"✗ Błąd wczytywania konfiguracji: {e}")
+            logging.error(f"Błąd wczytywania konfiguracji: {e}")
             self.schedules = []
 
     def create_default_config(self):
@@ -121,9 +121,9 @@ class SimpleFeeder:
             with open(self.config_file, 'w') as f:
                 json.dump(default_config, f, indent=2)
             self.schedules = default_config['schedules']
-            logging.info(f"✓ Utworzono domyślny config.json z harmonogramem: {', '.join(self.schedules)}")
+            logging.info(f"Utworzono domyślny config.json z harmonogramem: {', '.join(self.schedules)}")
         except Exception as e:
-            logging.error(f"✗ Błąd tworzenia konfiguracji: {e}")
+            logging.error(f"Błąd tworzenia konfiguracji: {e}")
 
     def setup_schedule(self):
         """Skonfiguruj harmonogram na podstawie config.json"""
@@ -136,9 +136,9 @@ class SimpleFeeder:
         for feed_time in self.schedules:
             try:
                 schedule.every().day.at(feed_time).do(self.scheduled_feed, feed_time)
-                logging.info(f"✓ Harmonogram dodany: {feed_time}")
+                logging.info(f"Harmonogram dodany: {feed_time}")
             except Exception as e:
-                logging.error(f"✗ Błąd dodawania harmonogramu {feed_time}: {e}")
+                logging.error(f"Błąd dodawania harmonogramu {feed_time}: {e}")
 
     def scheduled_feed(self, feed_time):
         """Zaplanowane karmienie"""
@@ -189,7 +189,7 @@ class SimpleFeeder:
                 self.servo.close()
             except:
                 pass
-        logging.info("✓ Karmnik zatrzymany")
+        logging.info("Karmnik zatrzymany")
 
 
 def signal_handler(signum, frame):
