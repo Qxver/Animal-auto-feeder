@@ -46,7 +46,7 @@ show_schedule() {
         return
     fi
 
-    echo "📅 Harmonogram karmienia:"
+    echo "Harmonogram karmienia:"
     echo ""
     python3 << EOF
 import json
@@ -139,7 +139,7 @@ case "$1" in
         sudo systemctl status feeder.service
         ;;
     logs)
-        echo "📋 Logi karmnika (Ctrl+C aby wyjść)..."
+        echo "Logi karmnika (Ctrl+C aby wyjść)..."
         sudo journalctl -u feeder.service -f
         ;;
     test)
