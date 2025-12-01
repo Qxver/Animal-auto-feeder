@@ -68,7 +68,7 @@ class SimpleFeeder:
             return False
 
         try:
-            logging.info("🍖 Rozpoczynam karmienie...")
+            logging.info("Rozpoczynam karmienie...")
 
             # Pozycja początkowa
             self.servo.min()
@@ -100,7 +100,7 @@ class SimpleFeeder:
                 self.schedules = config.get('schedules', [])
             logging.info(f"Konfiguracja wczytana: {len(self.schedules)} harmonogramów")
         except FileNotFoundError:
-            logging.info("⚠ Brak pliku konfiguracji, tworzę domyślny...")
+            logging.info("Brak pliku konfiguracji, tworzę domyślny...")
             self.create_default_config()
         except Exception as e:
             logging.error(f"Błąd wczytywania konfiguracji: {e}")
@@ -130,7 +130,7 @@ class SimpleFeeder:
         schedule.clear()
 
         if not self.schedules:
-            logging.warning("⚠ Brak harmonogramu karmienia!")
+            logging.warning("Brak harmonogramu karmienia!")
             return
 
         for feed_time in self.schedules:
@@ -142,7 +142,7 @@ class SimpleFeeder:
 
     def scheduled_feed(self, feed_time):
         """Zaplanowane karmienie"""
-        logging.info(f"⏰ HARMONOGRAM: Karmienie o {feed_time}")
+        logging.info(f"HARMONOGRAM: Karmienie o {feed_time}")
         self.feed()
 
     def print_status(self):
@@ -169,7 +169,7 @@ class SimpleFeeder:
 
     def run(self):
         """Główna pętla programu"""
-        logging.info("🚀 Karmnik działa... Naciśnij Ctrl+C aby zatrzymać")
+        logging.info("Karmnik działa... Naciśnij Ctrl+C aby zatrzymać")
         logging.info("")
 
         try:
@@ -177,7 +177,7 @@ class SimpleFeeder:
                 schedule.run_pending()
                 time.sleep(1)
         except KeyboardInterrupt:
-            logging.info("\n⚠ Otrzymano sygnał zatrzymania...")
+            logging.info("\nOtrzymano sygnał zatrzymania...")
         finally:
             self.cleanup()
 
@@ -194,7 +194,7 @@ class SimpleFeeder:
 
 def signal_handler(signum, frame):
     """Obsługa sygnałów systemowych"""
-    logging.info("\n⚠ Otrzymano sygnał zatrzymania...")
+    logging.info("\nOtrzymano sygnał zatrzymania...")
     sys.exit(0)
 
 
