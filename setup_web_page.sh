@@ -8,9 +8,9 @@ echo "1. Instalacja Flask..."
 pip3 install flask --break-system-packages
 
 # Kopiowanie pliku
-echo "2. Kopiowanie feeder_web.py..."
-cp feeder_web.py /home/admin/feeder/
-chmod +x /home/admin/feeder/feeder_web.py
+echo "2. Kopiowanie feeder_web_page.py..."
+cp feeder_web_page.py /home/admin/feeder/
+chmod +x /home/admin/feeder/feeder_web_page.py
 
 # Nadaj uprawnienia sudo bez hasła dla restartu usługi
 echo "3. Konfiguracja uprawnień sudo..."
@@ -33,7 +33,7 @@ After=network.target
 Type=simple
 User=admin
 WorkingDirectory=/home/admin/feeder
-ExecStart=/usr/bin/python3 /home/admin/feeder/feeder_web.py
+ExecStart=/usr/bin/python3 /home/admin/feeder/feeder_web_page.py
 Restart=always
 RestartSec=5
 
