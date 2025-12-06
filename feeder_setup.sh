@@ -14,8 +14,8 @@ mkdir -p "$FEEDER_DIR"
 cd "$FEEDER_DIR"
 
 echo "1. Kopiowanie pliku feeder_simple.py..."
-cp /home/admin/karmnik/Animal-auto-feeder/feeder_simple.py "$FEEDER_DIR/"
-chmod +x feeder_simple.py
+cp /home/admin/karmnik/Animal-auto-feeder/feeder.py "$FEEDER_DIR/"
+chmod +x feeder.py
 
 echo "2. Tworzenie domyślnego config.json..."
 cat > config.json << 'EOF'

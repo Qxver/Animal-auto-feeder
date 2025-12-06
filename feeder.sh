@@ -120,13 +120,13 @@ EOF
 
 case "$1" in
     start)
-        echo "🚀 Uruchamianie karmnika..."
+        echo "Uruchamianie karmnika..."
         sudo systemctl start feeder.service
         sleep 2
         sudo systemctl status feeder.service --no-pager
         ;;
     stop)
-        echo "⏹ Zatrzymywanie karmnika..."
+        echo "Zatrzymywanie karmnika..."
         sudo systemctl stop feeder.service
         ;;
     restart)

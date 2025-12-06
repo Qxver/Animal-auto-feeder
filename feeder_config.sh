@@ -24,7 +24,7 @@ show_help() {
 }
 
 test_feed() {
-    echo "🍖 Test karmienia..."
+    echo "Test karmienia..."
     cd "$FEEDER_DIR"
     python3 << 'EOF'
 from feeder_simple import SimpleFeeder
@@ -46,7 +46,7 @@ show_schedule() {
         return
     fi
 
-    echo "📅 Harmonogram karmienia:"
+    echo "Harmonogram karmienia:"
     echo ""
     python3 << EOF
 import json
@@ -120,17 +120,17 @@ EOF
 
 case "$1" in
     start)
-        echo "🚀 Uruchamianie karmnika..."
+        echo "Uruchamianie karmnika..."
         sudo systemctl start feeder.service
         sleep 2
         sudo systemctl status feeder.service --no-pager
         ;;
     stop)
-        echo "⏹ Zatrzymywanie karmnika..."
+        echo "Zatrzymywanie karmnika..."
         sudo systemctl stop feeder.service
         ;;
     restart)
-        echo "🔄 Restart karmnika..."
+        echo "Restart karmnika..."
         sudo systemctl restart feeder.service
         sleep 2
         sudo systemctl status feeder.service --no-pager
@@ -139,7 +139,7 @@ case "$1" in
         sudo systemctl status feeder.service
         ;;
     logs)
-        echo "📋 Logi karmnika (Ctrl+C aby wyjść)..."
+        echo "Logi karmnika (Ctrl+C aby wyjść)..."
         sudo journalctl -u feeder.service -f
         ;;
     test)
@@ -151,7 +151,7 @@ case "$1" in
     edit)
         nano "$CONFIG_FILE"
         echo ""
-        echo "⚠ Zrestartuj karmnik aby zastosować zmiany:"
+        echo "Zrestartuj karmnik aby zastosować zmiany:"
         echo "  sudo systemctl restart feeder.service"
         ;;
     add)

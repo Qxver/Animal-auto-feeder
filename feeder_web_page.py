@@ -313,9 +313,6 @@ HTML_TEMPLATE = '''
             }
         }
 
-        async function removeSchedule(time) {
-            if (!confirm(`Usunąć godzinę ${time}?`)) return;
-
             try {
                 const response = await fetch('/api/schedules', {
                     method: 'DELETE',

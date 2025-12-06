@@ -3,18 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_connect"
-        android:title="Połącz"
-        android:icon="@drawable/ic_bluetooth"
-        app:showAsAction="always" />
-
-    <item
-        android:id="@+id/action_sync"
-        android:title="Synchronizuj"
-        android:icon="@android:drawable/ic_popup_sync"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/action_test"
         android:title="Test servo"
         app:showAsAction="never" />
