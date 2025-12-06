@@ -22,7 +22,7 @@ HTML_TEMPLATE = '''
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>wKarmnik - Panel Sterowania</title>
+    <title>Karmnik - Panel Sterowania</title>
     <style>
         * {
             margin: 0;
@@ -241,12 +241,6 @@ HTML_TEMPLATE = '''
             </div>
         </div>
 
-        <div class="card">
-            <h2 style="margin-bottom: 20px;">Ostatnie Logi</h2>
-            <div class="log-container" id="logs">
-                Ładowanie logów...
-            </div>
-        </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -381,26 +375,14 @@ HTML_TEMPLATE = '''
             }
         }
 
-        async function loadLogs() {
-            try {
-                const response = await fetch('/api/logs');
-                const data = await response.json();
-                document.getElementById('logs').textContent = data.logs || 'Brak logów';
-            } catch (error) {
-                document.getElementById('logs').textContent = 'Błąd wczytywania logów';
-            }
-        }
-
         // Auto-refresh
         setInterval(() => {
             loadStatus();
-            loadLogs();
         }, 5000);
 
         // Initial load
         loadSchedules();
         loadStatus();
-        loadLogs();
     </script>
 </body>
 </html>
@@ -509,20 +491,6 @@ def get_status():
         return jsonify({'success': True, 'active': active})
     except Exception as e:
         return jsonify({'success': False, 'active': False})
-
-
-@app.route('/api/logs', methods=['GET'])
-def get_logs():
-    try:
-        result = subprocess.run(
-            ['journalctl', '-u', 'feeder.service', '-n', '20', '--no-pager'],
-            capture_output=True,
-            text=True
-        )
-        return jsonify({'success': True, 'logs': result.stdout})
-    except Exception as e:
-        return jsonify({'success': False, 'logs': str(e)})
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
