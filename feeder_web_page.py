@@ -22,7 +22,7 @@ HTML_TEMPLATE = '''
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karmnik - Panel Sterowania</title>
+    <title>wKarmnik - Panel Sterowania</title>
     <style>
         * {
             margin: 0;
@@ -240,7 +240,6 @@ HTML_TEMPLATE = '''
                 <div class="empty-state">Ładowanie...</div>
             </div>
         </div>
-
     </div>
 
     <div class="toast" id="toast"></div>
@@ -278,26 +277,6 @@ HTML_TEMPLATE = '''
             }
         }
 
-        async function removeSchedule(time) {
-            try {
-                const response = await fetch('/api/schedules', {
-                    method: 'DELETE',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({time: time})
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    showToast('Usunięto: ' + time);
-                    loadSchedules();
-                } else {
-                    showToast(data.message);
-                }
-            } catch (error) {
-                showToast('Błąd usuwania');
-            }
-        }
-        
         async function addSchedule() {
             const timeInput = document.getElementById('newTime');
             const time = timeInput.value;
@@ -327,6 +306,7 @@ HTML_TEMPLATE = '''
             }
         }
 
+        async function removeSchedule(time) {
             try {
                 const response = await fetch('/api/schedules', {
                     method: 'DELETE',
@@ -346,7 +326,6 @@ HTML_TEMPLATE = '''
             }
         }
 
-        
         async function testFeed() {
             showToast('Testowanie karmienia...');
             try {
@@ -512,6 +491,7 @@ def get_status():
         return jsonify({'success': True, 'active': active})
     except Exception as e:
         return jsonify({'success': False, 'active': False})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
