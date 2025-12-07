@@ -22,7 +22,7 @@ HTML_TEMPLATE = '''
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>wKarmnik - Panel Sterowania</title>
+    <title>Karmnik - Panel Sterowania</title>
     <style>
         * {
             margin: 0;
@@ -32,7 +32,7 @@ HTML_TEMPLATE = '''
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f5f5;
             min-height: 100vh;
             padding: 20px;
         }
@@ -44,10 +44,10 @@ HTML_TEMPLATE = '''
 
         .card {
             background: white;
-            border-radius: 20px;
+            border: 1px solid #ddd;
             padding: 30px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         h1 {
@@ -64,20 +64,22 @@ HTML_TEMPLATE = '''
         .status {
             display: inline-block;
             padding: 8px 16px;
-            border-radius: 20px;
             font-size: 0.9em;
             font-weight: 600;
             margin-bottom: 20px;
+            border: 1px solid;
         }
 
         .status.active {
-            background: #10b981;
-            color: white;
+            background: #e8f5e9;
+            color: #2e7d32;
+            border-color: #2e7d32;
         }
 
         .status.inactive {
-            background: #ef4444;
-            color: white;
+            background: #ffebee;
+            color: #c62828;
+            border-color: #c62828;
         }
 
         .schedule-list {
@@ -89,55 +91,56 @@ HTML_TEMPLATE = '''
             align-items: center;
             justify-content: space-between;
             padding: 15px;
-            background: #f8fafc;
-            border-radius: 10px;
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
             margin-bottom: 10px;
-            transition: transform 0.2s;
         }
 
         .schedule-item:hover {
-            transform: translateX(5px);
-            background: #f1f5f9;
+            background: #f5f5f5;
         }
 
         .schedule-time {
             font-size: 1.5em;
             font-weight: 600;
-            color: #667eea;
+            color: #333;
         }
 
         .btn {
             padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
+            border: 1px solid;
             font-size: 1em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s;
+            background: white;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            opacity: 0.8;
         }
 
         .btn-primary {
-            background: #667eea;
+            background: #2196f3;
+            border-color: #2196f3;
             color: white;
         }
 
         .btn-danger {
-            background: #ef4444;
+            background: #f44336;
+            border-color: #f44336;
             color: white;
         }
 
         .btn-success {
-            background: #10b981;
+            background: #4caf50;
+            border-color: #4caf50;
             color: white;
         }
 
         .btn-secondary {
-            background: #64748b;
+            background: #757575;
+            border-color: #757575;
             color: white;
         }
 
@@ -155,8 +158,7 @@ HTML_TEMPLATE = '''
         input[type="time"] {
             flex: 1;
             padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
+            border: 1px solid #ddd;
             font-size: 1em;
         }
 
@@ -167,21 +169,10 @@ HTML_TEMPLATE = '''
             margin-top: 20px;
         }
 
-        .log-container {
-            background: #1e293b;
-            color: #10b981;
-            padding: 15px;
-            border-radius: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9em;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: #94a3b8;
+            color: #999;
         }
 
         .toast {
@@ -189,28 +180,10 @@ HTML_TEMPLATE = '''
             bottom: 20px;
             right: 20px;
             padding: 15px 25px;
-            background: #1e293b;
+            background: #333;
             color: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 1px solid #000;
             display: none;
-            animation: slideIn 0.3s;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
         }
     </style>
 </head>
