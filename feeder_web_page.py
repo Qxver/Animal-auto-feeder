@@ -278,6 +278,26 @@ HTML_TEMPLATE = '''
             }
         }
 
+        async function removeSchedule(time) {
+            try {
+                const response = await fetch('/api/schedules', {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({time: time})
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Usunięto: ' + time);
+                    loadSchedules();
+                } else {
+                    showToast(data.message);
+                }
+            } catch (error) {
+                showToast('Błąd usuwania');
+            }
+        }
+        
         async function addSchedule() {
             const timeInput = document.getElementById('newTime');
             const time = timeInput.value;
@@ -326,6 +346,7 @@ HTML_TEMPLATE = '''
             }
         }
 
+        
         async function testFeed() {
             showToast('Testowanie karmienia...');
             try {
